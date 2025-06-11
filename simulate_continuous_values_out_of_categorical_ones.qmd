@@ -4,9 +4,7 @@ format: html
 editor: visual
 ---
 
-# Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution
-
-##Background
+## Background
 
 In this approach, we simulate continuous values from categorical intervals using rejection sampling based on a global normal distribution.
 
@@ -20,12 +18,12 @@ This allows us to simulate realistic values that:
 
 ## Step-by-Step Summary
 
-1.   **Define a global normal distribution**\
+1.  **Define a global normal distribution**\
     $w∼N(μ,σ^2)$ where:
-
     -   $μ$ is the midpoint of the entire observed range.
-
     -   $σ= \frac{\text{range width}}{6}$ = so that \~99.7% of values fall within bounds.
+
+<!-- -->
 
 2.  **For each row in the data:**
 
@@ -33,7 +31,7 @@ This allows us to simulate realistic values that:
 
     b\. Sample $y∼U(0,f_{max})$ where $f_{max}$​ is the maximum of the global normal density (occurring at $x=μ$ ).
 
-## R implementation 
+## R implementation
 
 ```{r}
 empirical_data <- data.frame(

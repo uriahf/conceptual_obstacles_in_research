@@ -39,27 +39,41 @@
     "href": "simulate_continuous_values_out_of_categorical_ones.html",
     "title": "Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution",
     "section": "",
-    "text": "In this approach, we simulate continuous values from categorical intervals using rejection sampling based on a global normal distribution.\nEach original bin (e.g., [100, 200]) acts as a domain for candidate values, but the acceptance is based on whether the candidate lies under the bell curve of a global normal distribution.\nThis allows us to simulate realistic values that:\n\nStay within original bounds\n\nEnable continuous modeling like linear regression"
-  },
-  {
-    "objectID": "simulate_continuous_values_out_of_categorical_ones.html#background",
-    "href": "simulate_continuous_values_out_of_categorical_ones.html#background",
-    "title": "Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution",
-    "section": "",
-    "text": "In this approach, we simulate continuous values from categorical intervals using rejection sampling based on a global normal distribution.\nEach original bin (e.g., [100, 200]) acts as a domain for candidate values, but the acceptance is based on whether the candidate lies under the bell curve of a global normal distribution.\nThis allows us to simulate realistic values that:\n\nStay within original bounds\n\nEnable continuous modeling like linear regression"
+    "text": "In this approach, we simulate continuous values from categorical intervals using rejection sampling based on a global normal distribution.\nEach original bin (e.g., [100, 200]) acts as a domain for candidate values, but the acceptance is based on whether the candidate lies under the bell curve of a global normal distribution.\nThis allows us to simulate realistic values that:\n\nStay within original bounds\nEnable continuous modeling like linear regression"
   },
   {
     "objectID": "simulate_continuous_values_out_of_categorical_ones.html#step-by-step-summary",
     "href": "simulate_continuous_values_out_of_categorical_ones.html#step-by-step-summary",
     "title": "Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution",
     "section": "Step-by-Step Summary",
-    "text": "Step-by-Step Summary\n\nDefine a global normal distribution ( w (, ^2) ), where:\n\n( = ) midpoint of the entire observed range (e.g., 500)\n( = ), so 99.7% of values fall within bounds\n\n\nFor each row in the data:\n\nSample a value ( x ) from the uniform distribution over the category range ( [a_i, b_i] )\n\nSample ( y (0, f_{}) ), where ( f_{} ) is the maximum of the normal density (at ( x = ))\n\nAccept ( x ) if ( y &lt; f(x) ), where ( f(x) ) is the normal density of ( w ) at ( x )"
+    "text": "Step-by-Step Summary\n\nDefine a global normal distribution\n\\(w∼N(μ,σ^2)\\) where:\n\n\\(μ\\) is the midpoint of the entire observed range.\n\\(σ= \\frac{\\text{range width}}{6}\\) = so that ~99.7% of values fall within bounds.\n\n\n\n\nFor each row in the data:\na. Sample a value candidate \\(x\\) from the uniform distribution over the category range \\([a_i, b_i]\\).\nb. Sample \\(y∼U(0,f_{max})\\) where \\(f_{max}\\)​ is the maximum of the global normal density (occurring at \\(x=μ\\) )."
   },
   {
     "objectID": "simulate_continuous_values_out_of_categorical_ones.html#r-implementation",
     "href": "simulate_continuous_values_out_of_categorical_ones.html#r-implementation",
     "title": "Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution",
-    "section": "R Implementation",
-    "text": "R Implementation"
+    "section": "R implementation",
+    "text": "R implementation\n\nempirical_data &lt;- data.frame(\n  id = 1:6,\n  category_min = c(100, 200, 150, 300, 200, 400),\n  category_max = c(300, 300, 250, 500, 1000, 600)\n)\n\nglobal_min &lt;- min(empirical_data$category_min)\nglobal_max &lt;- max(empirical_data$category_max)\nglobal_mu &lt;- (global_min + global_max) / 2\nglobal_sigma &lt;- (global_max - global_min) / 6\nf_max &lt;- dnorm(global_mu, mean = global_mu, sd = global_sigma)\n\n# Verbose rejection sampling with print statements and iteration count\nsimulate_verbose &lt;- function(min_val, max_val, mu, sigma, f_max, row_id = NA) {\n  iter &lt;- 0\n  repeat {\n    iter &lt;- iter + 1\n    x_candidate &lt;- runif(1, min = min_val, max = max_val)\n    y &lt;- runif(1, min = 0, max = f_max)\n    fx &lt;- dnorm(x_candidate, mean = mu, sd = sigma)\n\n    if (y &lt; fx) {\n      message(glue::glue(\"Row {row_id}: Accepted x = {round(x_candidate, 2)} on iteration {iter}\"))\n      return(x_candidate)\n    } else {\n      message(glue::glue(\"Row {row_id}: Rejected x = {round(x_candidate, 2)}\"))\n    }\n  }\n}\n\n\n# Apply simulation row-wise with purrr::map2 and verbose output\nset.seed(42)\nempirical_data$simulated_value &lt;- purrr::map2_dbl(\n  empirical_data$category_min,\n  empirical_data$category_max,\n  ~ simulate_verbose(.x, .y, mu = global_mu, sigma = global_sigma, f_max = f_max,\n                     row_id = empirical_data$id[which(empirical_data$category_min == .x & empirical_data$category_max == .y)[1]])\n)\n\nRow 1: Rejected x = 282.96\n\n\nRow 1: Rejected x = 157.23\n\n\nRow 1: Rejected x = 228.35\n\n\nRow 1: Rejected x = 247.32\n\n\nRow 1: Rejected x = 231.4\n\n\nRow 1: Rejected x = 191.55\n\n\nRow 1: Rejected x = 286.93\n\n\nRow 1: Rejected x = 192.46\n\n\nRow 1: Accepted x = 295.65 on iteration 9\n\n\nRow 2: Rejected x = 247.5\n\n\nRow 2: Accepted x = 290.4 on iteration 2\n\n\nRow 3: Rejected x = 248.89\n\n\nRow 3: Rejected x = 158.24\n\n\nRow 3: Rejected x = 189.02\n\n\nRow 3: Rejected x = 194.7\n\n\nRow 3: Rejected x = 223.76\n\n\nRow 3: Rejected x = 188.81\n\n\nRow 3: Rejected x = 150.39\n\n\nRow 3: Rejected x = 150.73\n\n\nRow 3: Rejected x = 240.66\n\n\nRow 3: Rejected x = 187.96\n\n\nRow 3: Rejected x = 153.74\n\n\nRow 3: Rejected x = 193.18\n\n\nRow 3: Rejected x = 238.78\n\n\nRow 3: Rejected x = 247.1\n\n\nRow 3: Rejected x = 183.34\n\n\nRow 3: Rejected x = 189.85\n\n\nRow 3: Rejected x = 153.89\n\n\nRow 3: Rejected x = 217.73\n\n\nRow 3: Rejected x = 176.11\n\n\nRow 3: Rejected x = 217.56\n\n\nRow 3: Rejected x = 225.95\n\n\nRow 3: Rejected x = 234.97\n\n\nRow 3: Rejected x = 177.13\n\n\nRow 3: Rejected x = 219.32\n\n\nRow 3: Rejected x = 154.3\n\n\nRow 3: Rejected x = 171.64\n\n\nRow 3: Rejected x = 169.74\n\n\nRow 3: Rejected x = 150.79\n\n\nRow 3: Accepted x = 201.44 on iteration 29\n\n\nRow 4: Accepted x = 416.32 on iteration 1\n\n\nRow 5: Accepted x = 487.22 on iteration 1\n\n\nRow 6: Accepted x = 555.16 on iteration 1\n\n# Show the final simulated dataset\nprint(empirical_data)\n\n  id category_min category_max simulated_value\n1  1          100          300        295.6453\n2  2          200          300        290.4031\n3  3          150          250        201.4408\n4  4          300          500        416.3208\n5  5          200         1000        487.2226\n6  6          400          600        555.1647"
+  },
+  {
+    "objectID": "simulate_continuous_values_out_of_categorical_ones.html#visualization",
+    "href": "simulate_continuous_values_out_of_categorical_ones.html#visualization",
+    "title": "Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution",
+    "section": "Visualization",
+    "text": "Visualization\n\nlibrary(ggplot2)\n\nggplot(empirical_data, aes(x = factor(id), y = simulated_value)) +\n  geom_point(size = 3) +\n  geom_errorbar(aes(ymin = category_min, ymax = category_max), width = 0.2) +\n  labs(x = \"Observation ID\", y = \"Simulated Value\",\n       title = \"Simulated Values from Rejection Sampling\") +\n  theme_minimal()"
+  },
+  {
+    "objectID": "simulate_continuous_values_out_of_categorical_ones.html#conclusion",
+    "href": "simulate_continuous_values_out_of_categorical_ones.html#conclusion",
+    "title": "Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution",
+    "section": "Conclusion",
+    "text": "Conclusion\nThis method simulates continuous values that:\n\nRespect original categorical bins\nAre more likely to be accepted near the center of a plausible global distribution\nCan be used as inputs to linear models or other numeric frameworks by combining interval constraints with a global density shape, the method balances interpretability, flexibility, and statistical plausibility."
+  },
+  {
+    "objectID": "simulate_continuous_values_out_of_categorical_ones.html#background",
+    "href": "simulate_continuous_values_out_of_categorical_ones.html#background",
+    "title": "Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution",
+    "section": "",
+    "text": "In this approach, we simulate continuous values from categorical intervals using rejection sampling based on a global normal distribution.\nEach original bin (e.g., [100, 200]) acts as a domain for candidate values, but the acceptance is based on whether the candidate lies under the bell curve of a global normal distribution.\nThis allows us to simulate realistic values that:\n\nStay within original bounds\nEnable continuous modeling like linear regression"
   }
 ]

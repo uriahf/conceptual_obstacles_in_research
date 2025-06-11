@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 </style>
 
 
@@ -151,13 +185,9 @@ window.Quarto = {
   <ul>
   <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background">Background</a></li>
   <li><a href="#step-by-step-summary" id="toc-step-by-step-summary" class="nav-link" data-scroll-target="#step-by-step-summary">Step-by-Step Summary</a></li>
-  <li><a href="#r-implementation" id="toc-r-implementation" class="nav-link" data-scroll-target="#r-implementation">R Implementation</a></li>
-  <li><a href="#sample-dataset-with-interval-bin-categories" id="toc-sample-dataset-with-interval-bin-categories" class="nav-link" data-scroll-target="#sample-dataset-with-interval-bin-categories">Sample dataset with interval (bin) categories</a></li>
-  <li><a href="#step-1-define-global-normal-distribution" id="toc-step-1-define-global-normal-distribution" class="nav-link" data-scroll-target="#step-1-define-global-normal-distribution">Step 1: Define global normal distribution</a></li>
-  <li><a href="#step-2-get-max-density-of-the-global-normal-at-the-mean" id="toc-step-2-get-max-density-of-the-global-normal-at-the-mean" class="nav-link" data-scroll-target="#step-2-get-max-density-of-the-global-normal-at-the-mean">Step 2: Get max density of the global normal (at the mean)</a></li>
-  <li><a href="#step-3-rejection-sampling-function" id="toc-step-3-rejection-sampling-function" class="nav-link" data-scroll-target="#step-3-rejection-sampling-function">Step 3: Rejection sampling function</a></li>
-  <li><a href="#step-4-apply-simulation-per-row" id="toc-step-4-apply-simulation-per-row" class="nav-link" data-scroll-target="#step-4-apply-simulation-per-row">Step 4: Apply simulation per row</a></li>
-  <li><a href="#output-simulated-data" id="toc-output-simulated-data" class="nav-link" data-scroll-target="#output-simulated-data">Output simulated data</a></li>
+  <li><a href="#r-implementation" id="toc-r-implementation" class="nav-link" data-scroll-target="#r-implementation">R implementation</a></li>
+  <li><a href="#visualization" id="toc-visualization" class="nav-link" data-scroll-target="#visualization">Visualization</a></li>
+  <li><a href="#conclusion" id="toc-conclusion" class="nav-link" data-scroll-target="#conclusion">Conclusion</a></li>
   </ul>
 </nav>
     </div>
@@ -185,66 +215,243 @@ window.Quarto = {
 
 <section id="background" class="level2">
 <h2 class="anchored" data-anchor-id="background">Background</h2>
-<p>In this approach, we simulate continuous values from categorical intervals using <strong>rejection sampling</strong> based on a <strong>global normal distribution</strong>.</p>
-<p>Each original bin (e.g., <code>[100, 200]</code>) acts as a domain for candidate values, but the <strong>acceptance</strong> is based on whether the candidate lies under the bell curve of a global normal distribution.</p>
+<p>In this approach, we simulate continuous values from categorical intervals using rejection sampling based on a global normal distribution.</p>
+<p>Each original bin (e.g., [100, 200]) acts as a domain for candidate values, but the acceptance is based on whether the candidate lies under the bell curve of a global normal distribution.</p>
 <p>This allows us to simulate realistic values that:</p>
 <ul>
-<li>Stay within original bounds<br>
-</li>
-<li>Enable continuous modeling like linear regression</li>
+<li><p>Stay within original bounds</p></li>
+<li><p>Enable continuous modeling like linear regression</p></li>
 </ul>
 </section>
 <section id="step-by-step-summary" class="level2">
 <h2 class="anchored" data-anchor-id="step-by-step-summary">Step-by-Step Summary</h2>
 <ol type="1">
-<li>Define a global normal distribution ( w (, ^2) ), where:
+<li><strong>Define a global normal distribution</strong><br>
+<span class="math inline">\(w∼N(μ,σ^2)\)</span> where:
 <ul>
-<li>( = ) midpoint of the entire observed range (e.g., 500)</li>
-<li>( = ), so 99.7% of values fall within bounds</li>
+<li><span class="math inline">\(μ\)</span> is the midpoint of the entire observed range.</li>
+<li><span class="math inline">\(σ= \frac{\text{range width}}{6}\)</span> = so that ~99.7% of values fall within bounds.</li>
 </ul></li>
 </ol>
-<p>For each row in the data:</p>
-<ol type="1">
-<li>Sample a value ( x ) from the uniform distribution over the category range ( [a_i, b_i] )<br>
-</li>
-<li>Sample ( y (0, f_{}) ), where ( f_{} ) is the maximum of the normal density (at ( x = ))<br>
-</li>
-<li>Accept ( x ) <strong>if</strong> ( y &lt; f(x) ), where ( f(x) ) is the normal density of ( w ) at ( x )</li>
+<!-- -->
+<ol start="2" type="1">
+<li><p><strong>For each row in the data:</strong></p>
+<p>a. Sample a value candidate <span class="math inline">\(x\)</span> from the uniform distribution over the category range <span class="math inline">\([a_i, b_i]\)</span>.</p>
+<p>b. Sample <span class="math inline">\(y∼U(0,f_{max})\)</span> where <span class="math inline">\(f_{max}\)</span>​ is the maximum of the global normal density (occurring at <span class="math inline">\(x=μ\)</span> ).</p></li>
 </ol>
-<hr>
 </section>
 <section id="r-implementation" class="level2">
-<h2 class="anchored" data-anchor-id="r-implementation">R Implementation</h2>
+<h2 class="anchored" data-anchor-id="r-implementation">R implementation</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>empirical_data <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">id =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">6</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">category_min =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">150</span>, <span class="dv">300</span>, <span class="dv">200</span>, <span class="dv">400</span>),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">category_max =</span> <span class="fu">c</span>(<span class="dv">300</span>, <span class="dv">300</span>, <span class="dv">250</span>, <span class="dv">500</span>, <span class="dv">1000</span>, <span class="dv">600</span>)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>global_min <span class="ot">&lt;-</span> <span class="fu">min</span>(empirical_data<span class="sc">$</span>category_min)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>global_max <span class="ot">&lt;-</span> <span class="fu">max</span>(empirical_data<span class="sc">$</span>category_max)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>global_mu <span class="ot">&lt;-</span> (global_min <span class="sc">+</span> global_max) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>global_sigma <span class="ot">&lt;-</span> (global_max <span class="sc">-</span> global_min) <span class="sc">/</span> <span class="dv">6</span></span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>f_max <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(global_mu, <span class="at">mean =</span> global_mu, <span class="at">sd =</span> global_sigma)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Verbose rejection sampling with print statements and iteration count</span></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>simulate_verbose <span class="ot">&lt;-</span> <span class="cf">function</span>(min_val, max_val, mu, sigma, f_max, <span class="at">row_id =</span> <span class="cn">NA</span>) {</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>  iter <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>  <span class="cf">repeat</span> {</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    iter <span class="ot">&lt;-</span> iter <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>    x_candidate <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>, <span class="at">min =</span> min_val, <span class="at">max =</span> max_val)</span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>    y <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="dv">1</span>, <span class="at">min =</span> <span class="dv">0</span>, <span class="at">max =</span> f_max)</span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>    fx <span class="ot">&lt;-</span> <span class="fu">dnorm</span>(x_candidate, <span class="at">mean =</span> mu, <span class="at">sd =</span> sigma)</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (y <span class="sc">&lt;</span> fx) {</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>      <span class="fu">message</span>(glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">"Row {row_id}: Accepted x = {round(x_candidate, 2)} on iteration {iter}"</span>))</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>      <span class="fu">return</span>(x_candidate)</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>    } <span class="cf">else</span> {</span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>      <span class="fu">message</span>(glue<span class="sc">::</span><span class="fu">glue</span>(<span class="st">"Row {row_id}: Rejected x = {round(x_candidate, 2)}"</span>))</span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a><span class="co"># Apply simulation row-wise with purrr::map2 and verbose output</span></span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">42</span>)</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>empirical_data<span class="sc">$</span>simulated_value <span class="ot">&lt;-</span> purrr<span class="sc">::</span><span class="fu">map2_dbl</span>(</span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>  empirical_data<span class="sc">$</span>category_min,</span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>  empirical_data<span class="sc">$</span>category_max,</span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span> <span class="fu">simulate_verbose</span>(.x, .y, <span class="at">mu =</span> global_mu, <span class="at">sigma =</span> global_sigma, <span class="at">f_max =</span> f_max,</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>                     <span class="at">row_id =</span> empirical_data<span class="sc">$</span>id[<span class="fu">which</span>(empirical_data<span class="sc">$</span>category_min <span class="sc">==</span> .x <span class="sc">&amp;</span> empirical_data<span class="sc">$</span>category_max <span class="sc">==</span> .y)[<span class="dv">1</span>]])</span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 1: Rejected x = 282.96</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 1: Rejected x = 157.23</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 1: Rejected x = 228.35</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 1: Rejected x = 247.32</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 1: Rejected x = 231.4</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 1: Rejected x = 191.55</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 1: Rejected x = 286.93</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 1: Rejected x = 192.46</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 1: Accepted x = 295.65 on iteration 9</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 2: Rejected x = 247.5</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 2: Accepted x = 290.4 on iteration 2</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 248.89</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 158.24</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 189.02</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 194.7</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 223.76</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 188.81</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 150.39</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 150.73</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 240.66</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 187.96</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 153.74</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 193.18</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 238.78</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 247.1</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 183.34</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 189.85</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 153.89</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 217.73</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 176.11</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 217.56</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 225.95</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 234.97</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 177.13</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 219.32</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 154.3</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 171.64</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 169.74</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Rejected x = 150.79</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 3: Accepted x = 201.44 on iteration 29</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 4: Accepted x = 416.32 on iteration 1</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 5: Accepted x = 487.22 on iteration 1</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Row 6: Accepted x = 555.16 on iteration 1</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Show the final simulated dataset</span></span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(empirical_data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  id category_min category_max simulated_value
+1  1          100          300        295.6453
+2  2          200          300        290.4031
+3  3          150          250        201.4408
+4  4          300          500        416.3208
+5  5          200         1000        487.2226
+6  6          400          600        555.1647</code></pre>
+</div>
+</div>
 </section>
-<section id="sample-dataset-with-interval-bin-categories" class="level1">
-<h1>Sample dataset with interval (bin) categories</h1>
-<p>empirical_data &lt;- data.frame( id = 1:6, category_min = c(100, 200, 150, 300, 200, 400), category_max = c(300, 300, 250, 500, 1000, 600) )</p>
+<section id="visualization" class="level2">
+<h2 class="anchored" data-anchor-id="visualization">Visualization</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(empirical_data, <span class="fu">aes</span>(<span class="at">x =</span> <span class="fu">factor</span>(id), <span class="at">y =</span> simulated_value)) <span class="sc">+</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_errorbar</span>(<span class="fu">aes</span>(<span class="at">ymin =</span> category_min, <span class="at">ymax =</span> category_max), <span class="at">width =</span> <span class="fl">0.2</span>) <span class="sc">+</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Observation ID"</span>, <span class="at">y =</span> <span class="st">"Simulated Value"</span>,</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">title =</span> <span class="st">"Simulated Values from Rejection Sampling"</span>) <span class="sc">+</span></span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="simulate_continuous_values_out_of_categorical_ones_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
-<section id="step-1-define-global-normal-distribution" class="level1">
-<h1>Step 1: Define global normal distribution</h1>
-<p>global_min &lt;- min(empirical_data<span class="math inline">\(category_min)
-global_max &lt;- max(empirical_data\)</span>category_max)</p>
-<p>global_mu &lt;- (global_min + global_max) / 2 global_sigma &lt;- (global_max - global_min) / 6</p>
-</section>
-<section id="step-2-get-max-density-of-the-global-normal-at-the-mean" class="level1">
-<h1>Step 2: Get max density of the global normal (at the mean)</h1>
-<p>f_max &lt;- dnorm(global_mu, mean = global_mu, sd = global_sigma)</p>
-</section>
-<section id="step-3-rejection-sampling-function" class="level1">
-<h1>Step 3: Rejection sampling function</h1>
-<p>simulate_by_density_rejection &lt;- function(min_val, max_val, mu, sigma, f_max) { repeat { x_candidate &lt;- runif(1, min = min_val, max = max_val) y &lt;- runif(1, min = 0, max = f_max) fx &lt;- dnorm(x_candidate, mean = mu, sd = sigma)</p>
-<pre><code>if (y &lt; fx) return(x_candidate)</code></pre>
-<p>} }</p>
-</section>
-<section id="step-4-apply-simulation-per-row" class="level1">
-<h1>Step 4: Apply simulation per row</h1>
-<p>set.seed(42) empirical_data<span class="math inline">\(simulated_value &lt;- mapply(
-  simulate_by_density_rejection,
-  empirical_data\)</span>category_min, empirical_data$category_max, MoreArgs = list(mu = global_mu, sigma = global_sigma, f_max = f_max) )</p>
-</section>
-<section id="output-simulated-data" class="level1">
-<h1>Output simulated data</h1>
-<p>print(empirical_data)</p>
+<section id="conclusion" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion">Conclusion</h2>
+<p>This method simulates continuous values that:</p>
+<ul>
+<li><p>Respect original categorical bins</p></li>
+<li><p>Are more likely to be accepted near the center of a plausible global distribution</p></li>
+<li><p>Can be used as inputs to linear models or other numeric frameworks by combining <strong>interval constraints</strong> with a <strong>global density shape</strong>, the method balances interpretability, flexibility, and statistical plausibility.</p></li>
+</ul>
 
 
 </section>
