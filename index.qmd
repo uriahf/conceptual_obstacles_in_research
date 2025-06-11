@@ -1,0 +1,8 @@
+---
+title: "Conceptual Obstacles in Research"
+about:
+  template: trestles
+  image: logo.png
+---
+
+This is a site for documenting conceptual obstacles in research.

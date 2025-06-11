@@ -1,0 +1,39 @@
+---
+title: "Treatment"
+---
+
+## Main Question: What is the treatment effect?
+
+### For RCT, no confounders should be involved
+
+```{mermaid}
+graph LR
+  T[Treatment: 💊 Metformin] --> O[Outcome: 📉 Glycemic Control]
+
+```
+
+## How to define control groups?
+
+Clinicians tend to have an intuition about the treatment groups (metphormin as an exposure) but not about the control group (something else? non-treated?).
+
+A sentence like "To examine the effect of metformin use on glycemic control and diabetes complications" is not clear about the implied counterfactual: What if the patient didn't take any meds? Maybe some other meds? What about a change in the treatment regime within the followup?
+
+### Dose-Response analysis
+
+The most practical solution would be to translate different doses into binary variables, i.e low-dose (💊) vs high-dose (💊💊💊).
+
+### Dose-Change vs Treatment-Change
+
+If the decision maker get's to a decision points he might have two options: Change the dose(💊💊💊) or change the treatment (💉).
+
+## Index Date for Control Groups:
+
+### Alternative treatment Initiation 💉
+
+If we compare different treatment as the control group, the treatment initiation of the alternative treatment is a natural candidate for the index date.
+
+### Dose-Response Initiation 💊💊💊
+
+If we compare different dose as the control group, the treatment initiation is a natural candidate for the index date.
+
+### 

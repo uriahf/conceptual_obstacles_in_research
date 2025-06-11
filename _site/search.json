@@ -1,0 +1,37 @@
+[
+  {
+    "objectID": "treatment.html",
+    "href": "treatment.html",
+    "title": "Treatment",
+    "section": "",
+    "text": "graph LR\n  T[Treatment: 💊 Metformin] --&gt; O[Outcome: 📉 Glycemic Control]"
+  },
+  {
+    "objectID": "treatment.html#main-question-what-is-the-treatment-effect",
+    "href": "treatment.html#main-question-what-is-the-treatment-effect",
+    "title": "Treatment",
+    "section": "",
+    "text": "graph LR\n  T[Treatment: 💊 Metformin] --&gt; O[Outcome: 📉 Glycemic Control]"
+  },
+  {
+    "objectID": "treatment.html#how-to-define-control-groups",
+    "href": "treatment.html#how-to-define-control-groups",
+    "title": "Treatment",
+    "section": "How to define control groups?",
+    "text": "How to define control groups?\nClinicians tend to have an intuition about the treatment groups (metphormin as an exposure) but not about the control group (something else? non-treated?).\nA sentence like “To examine the effect of metformin use on glycemic control and diabetes complications” is not clear about the implied counterfactual: What if the patient didn’t take any meds? Maybe some other meds? What about a change in the treatment regime within the followup?\n\nDose-Response analysis\nThe most practical solution would be to translate different doses into binary variables, i.e low-dose (💊) vs high-dose (💊💊💊).\n\n\nDose-Change vs Treatment-Change\nIf the decision maker get’s to a decision points he might have two options: Change the dose(💊💊💊) or change the treatment (💉)."
+  },
+  {
+    "objectID": "treatment.html#index-date-for-control-groups",
+    "href": "treatment.html#index-date-for-control-groups",
+    "title": "Treatment",
+    "section": "Index Date for Control Groups:",
+    "text": "Index Date for Control Groups:\n\nAlternative treatment Initiation 💉\nIf we compare different treatment as the control group, the treatment initiation of the alternative treatment is a natural candidate for the index date.\n\n\nDose-Response Initiation 💊💊💊\nIf we compare different dose as the control group, the treatment initiation is a natural candidate for the index date."
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Conceptual Obstacles in Research",
+    "section": "",
+    "text": "This is a site for documenting conceptual obstacles in research."
+  }
+]

@@ -1,0 +1,31 @@
+
+color:
+  palette:
+    midnight: "#0f0f23"
+    obsidian: "#1a1a2e"  
+    lavender: "#f7f4ff"
+    blush: "#fff5f7"
+    amethyst: "#8b5cf6"
+    rose-gold: "#f472b6"
+    electric: "#06ffa5"
+    citrus: "#fbbf24"
+    vermillion: "#f97316"
+    indigo: "#4f46e5"
+    teal: "#14b8a6"
+  background: lavender
+  foreground: midnight
+  primary: amethyst
+  secondary: rose-gold
+  success: electric
+  warning: citrus
+  danger: vermillion
+
+
+typography:
+  fonts:
+    - family: Inter
+      source: google
+    - family: Source Serif Pro
+      source: google
+  base: Inter
+  headings: Source Serif Pro
