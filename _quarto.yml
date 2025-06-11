@@ -9,6 +9,8 @@ website:
         text: Home
       - treatment.qmd
       - communication.qmd
+      - href: simulate_continuous_values_out_of_categorical_ones.qmd
+        text: Simulate Continuous Values
 
 format:
   html:

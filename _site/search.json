@@ -33,5 +33,33 @@
     "title": "Conceptual Obstacles in Research",
     "section": "",
     "text": "This is a site for documenting conceptual obstacles in research."
+  },
+  {
+    "objectID": "simulate_continuous_values_out_of_categorical_ones.html",
+    "href": "simulate_continuous_values_out_of_categorical_ones.html",
+    "title": "Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution",
+    "section": "",
+    "text": "In this approach, we simulate continuous values from categorical intervals using rejection sampling based on a global normal distribution.\nEach original bin (e.g., [100, 200]) acts as a domain for candidate values, but the acceptance is based on whether the candidate lies under the bell curve of a global normal distribution.\nThis allows us to simulate realistic values that:\n\nStay within original bounds\n\nEnable continuous modeling like linear regression"
+  },
+  {
+    "objectID": "simulate_continuous_values_out_of_categorical_ones.html#background",
+    "href": "simulate_continuous_values_out_of_categorical_ones.html#background",
+    "title": "Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution",
+    "section": "",
+    "text": "In this approach, we simulate continuous values from categorical intervals using rejection sampling based on a global normal distribution.\nEach original bin (e.g., [100, 200]) acts as a domain for candidate values, but the acceptance is based on whether the candidate lies under the bell curve of a global normal distribution.\nThis allows us to simulate realistic values that:\n\nStay within original bounds\n\nEnable continuous modeling like linear regression"
+  },
+  {
+    "objectID": "simulate_continuous_values_out_of_categorical_ones.html#step-by-step-summary",
+    "href": "simulate_continuous_values_out_of_categorical_ones.html#step-by-step-summary",
+    "title": "Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution",
+    "section": "Step-by-Step Summary",
+    "text": "Step-by-Step Summary\n\nDefine a global normal distribution ( w (, ^2) ), where:\n\n( = ) midpoint of the entire observed range (e.g., 500)\n( = ), so 99.7% of values fall within bounds\n\n\nFor each row in the data:\n\nSample a value ( x ) from the uniform distribution over the category range ( [a_i, b_i] )\n\nSample ( y (0, f_{}) ), where ( f_{} ) is the maximum of the normal density (at ( x = ))\n\nAccept ( x ) if ( y &lt; f(x) ), where ( f(x) ) is the normal density of ( w ) at ( x )"
+  },
+  {
+    "objectID": "simulate_continuous_values_out_of_categorical_ones.html#r-implementation",
+    "href": "simulate_continuous_values_out_of_categorical_ones.html#r-implementation",
+    "title": "Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution",
+    "section": "R Implementation",
+    "text": "R Implementation"
   }
 ]

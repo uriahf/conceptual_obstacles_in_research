@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Communication – Conceptual Obstacles in Research</title>
+<title>Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution – Conceptual Obstacles in Research</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -67,6 +67,35 @@ ul.task-list li input[type="checkbox"] {
   }
 }</script>
 
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="styles.css">
 </head>
@@ -97,11 +126,11 @@ ul.task-list li input[type="checkbox"] {
 <span class="menu-text">Treatment</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link active" href="./communication.html" aria-current="page"> 
+    <a class="nav-link" href="./communication.html"> 
 <span class="menu-text">Communication</span></a>
   </li>  
   <li class="nav-item">
-    <a class="nav-link" href="./simulate_continuous_values_out_of_categorical_ones.html"> 
+    <a class="nav-link active" href="./simulate_continuous_values_out_of_categorical_ones.html" aria-current="page"> 
 <span class="menu-text">Simulate Continuous Values</span></a>
   </li>  
 </ul>
@@ -115,15 +144,29 @@ ul.task-list li input[type="checkbox"] {
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
 <!-- margin-sidebar -->
-    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar zindex-bottom">
-        
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#background" id="toc-background" class="nav-link active" data-scroll-target="#background">Background</a></li>
+  <li><a href="#step-by-step-summary" id="toc-step-by-step-summary" class="nav-link" data-scroll-target="#step-by-step-summary">Step-by-Step Summary</a></li>
+  <li><a href="#r-implementation" id="toc-r-implementation" class="nav-link" data-scroll-target="#r-implementation">R Implementation</a></li>
+  <li><a href="#sample-dataset-with-interval-bin-categories" id="toc-sample-dataset-with-interval-bin-categories" class="nav-link" data-scroll-target="#sample-dataset-with-interval-bin-categories">Sample dataset with interval (bin) categories</a></li>
+  <li><a href="#step-1-define-global-normal-distribution" id="toc-step-1-define-global-normal-distribution" class="nav-link" data-scroll-target="#step-1-define-global-normal-distribution">Step 1: Define global normal distribution</a></li>
+  <li><a href="#step-2-get-max-density-of-the-global-normal-at-the-mean" id="toc-step-2-get-max-density-of-the-global-normal-at-the-mean" class="nav-link" data-scroll-target="#step-2-get-max-density-of-the-global-normal-at-the-mean">Step 2: Get max density of the global normal (at the mean)</a></li>
+  <li><a href="#step-3-rejection-sampling-function" id="toc-step-3-rejection-sampling-function" class="nav-link" data-scroll-target="#step-3-rejection-sampling-function">Step 3: Rejection sampling function</a></li>
+  <li><a href="#step-4-apply-simulation-per-row" id="toc-step-4-apply-simulation-per-row" class="nav-link" data-scroll-target="#step-4-apply-simulation-per-row">Step 4: Apply simulation per row</a></li>
+  <li><a href="#output-simulated-data" id="toc-output-simulated-data" class="nav-link" data-scroll-target="#output-simulated-data">Output simulated data</a></li>
+  </ul>
+</nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Communication</h1>
+<h1 class="title">Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution</h1>
 </div>
 
 
@@ -140,8 +183,71 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
+<section id="background" class="level2">
+<h2 class="anchored" data-anchor-id="background">Background</h2>
+<p>In this approach, we simulate continuous values from categorical intervals using <strong>rejection sampling</strong> based on a <strong>global normal distribution</strong>.</p>
+<p>Each original bin (e.g., <code>[100, 200]</code>) acts as a domain for candidate values, but the <strong>acceptance</strong> is based on whether the candidate lies under the bell curve of a global normal distribution.</p>
+<p>This allows us to simulate realistic values that:</p>
+<ul>
+<li>Stay within original bounds<br>
+</li>
+<li>Enable continuous modeling like linear regression</li>
+</ul>
+</section>
+<section id="step-by-step-summary" class="level2">
+<h2 class="anchored" data-anchor-id="step-by-step-summary">Step-by-Step Summary</h2>
+<ol type="1">
+<li>Define a global normal distribution ( w (, ^2) ), where:
+<ul>
+<li>( = ) midpoint of the entire observed range (e.g., 500)</li>
+<li>( = ), so 99.7% of values fall within bounds</li>
+</ul></li>
+</ol>
+<p>For each row in the data:</p>
+<ol type="1">
+<li>Sample a value ( x ) from the uniform distribution over the category range ( [a_i, b_i] )<br>
+</li>
+<li>Sample ( y (0, f_{}) ), where ( f_{} ) is the maximum of the normal density (at ( x = ))<br>
+</li>
+<li>Accept ( x ) <strong>if</strong> ( y &lt; f(x) ), where ( f(x) ) is the normal density of ( w ) at ( x )</li>
+</ol>
+<hr>
+</section>
+<section id="r-implementation" class="level2">
+<h2 class="anchored" data-anchor-id="r-implementation">R Implementation</h2>
+</section>
+<section id="sample-dataset-with-interval-bin-categories" class="level1">
+<h1>Sample dataset with interval (bin) categories</h1>
+<p>empirical_data &lt;- data.frame( id = 1:6, category_min = c(100, 200, 150, 300, 200, 400), category_max = c(300, 300, 250, 500, 1000, 600) )</p>
+</section>
+<section id="step-1-define-global-normal-distribution" class="level1">
+<h1>Step 1: Define global normal distribution</h1>
+<p>global_min &lt;- min(empirical_data<span class="math inline">\(category_min)
+global_max &lt;- max(empirical_data\)</span>category_max)</p>
+<p>global_mu &lt;- (global_min + global_max) / 2 global_sigma &lt;- (global_max - global_min) / 6</p>
+</section>
+<section id="step-2-get-max-density-of-the-global-normal-at-the-mean" class="level1">
+<h1>Step 2: Get max density of the global normal (at the mean)</h1>
+<p>f_max &lt;- dnorm(global_mu, mean = global_mu, sd = global_sigma)</p>
+</section>
+<section id="step-3-rejection-sampling-function" class="level1">
+<h1>Step 3: Rejection sampling function</h1>
+<p>simulate_by_density_rejection &lt;- function(min_val, max_val, mu, sigma, f_max) { repeat { x_candidate &lt;- runif(1, min = min_val, max = max_val) y &lt;- runif(1, min = 0, max = f_max) fx &lt;- dnorm(x_candidate, mean = mu, sd = sigma)</p>
+<pre><code>if (y &lt; fx) return(x_candidate)</code></pre>
+<p>} }</p>
+</section>
+<section id="step-4-apply-simulation-per-row" class="level1">
+<h1>Step 4: Apply simulation per row</h1>
+<p>set.seed(42) empirical_data<span class="math inline">\(simulated_value &lt;- mapply(
+  simulate_by_density_rejection,
+  empirical_data\)</span>category_min, empirical_data$category_max, MoreArgs = list(mu = global_mu, sigma = global_sigma, f_max = f_max) )</p>
+</section>
+<section id="output-simulated-data" class="level1">
+<h1>Output simulated data</h1>
+<p>print(empirical_data)</p>
 
 
+</section>
 
 </main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
