@@ -42,6 +42,13 @@
     "text": "In this approach, we simulate continuous values from categorical intervals using rejection sampling based on a global normal distribution.\nEach original bin (e.g., [100, 200]) acts as a domain for candidate values, but the acceptance is based on whether the candidate lies under the bell curve of a global normal distribution.\nThis allows us to simulate realistic values that:\n\nStay within original bounds\nEnable continuous modeling like linear regression"
   },
   {
+    "objectID": "simulate_continuous_values_out_of_categorical_ones.html#background",
+    "href": "simulate_continuous_values_out_of_categorical_ones.html#background",
+    "title": "Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution",
+    "section": "",
+    "text": "In this approach, we simulate continuous values from categorical intervals using rejection sampling based on a global normal distribution.\nEach original bin (e.g., [100, 200]) acts as a domain for candidate values, but the acceptance is based on whether the candidate lies under the bell curve of a global normal distribution.\nThis allows us to simulate realistic values that:\n\nStay within original bounds\nEnable continuous modeling like linear regression"
+  },
+  {
     "objectID": "simulate_continuous_values_out_of_categorical_ones.html#step-by-step-summary",
     "href": "simulate_continuous_values_out_of_categorical_ones.html#step-by-step-summary",
     "title": "Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution",
@@ -68,12 +75,5 @@
     "title": "Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution",
     "section": "Conclusion",
     "text": "Conclusion\nThis method simulates continuous values that:\n\nRespect original categorical bins\nAre more likely to be accepted near the center of a plausible global distribution\nCan be used as inputs to linear models or other numeric frameworks by combining interval constraints with a global density shape, the method balances interpretability, flexibility, and statistical plausibility."
-  },
-  {
-    "objectID": "simulate_continuous_values_out_of_categorical_ones.html#background",
-    "href": "simulate_continuous_values_out_of_categorical_ones.html#background",
-    "title": "Simulating Continuous Values via Rejection Sampling from a Global Normal Distribution",
-    "section": "",
-    "text": "In this approach, we simulate continuous values from categorical intervals using rejection sampling based on a global normal distribution.\nEach original bin (e.g., [100, 200]) acts as a domain for candidate values, but the acceptance is based on whether the candidate lies under the bell curve of a global normal distribution.\nThis allows us to simulate realistic values that:\n\nStay within original bounds\nEnable continuous modeling like linear regression"
   }
 ]
